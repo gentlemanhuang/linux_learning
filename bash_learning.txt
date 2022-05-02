@@ -1,0 +1,85 @@
+#! /bin/bash
+
+1.脚本运行四种方式
+bash  2.sh 
+./ 2.sh
+source  2.sh
+. ./2.sh
+前两种是子进程(内部命令)，后两者是本身进程（外部命令）。
+
+
+2.'|'管道符
+cat | ps  //可以发现管道符会前后两个命令建立子进程,所有要避免在管道中使用内建命令。
+
+3.重定向
+< //输入重定向
+> //输出重定向
+>> //追加方式输出重定向
+2> //标准错误重定向
+&> //正确、错误全部重定向
+
+
+4.添加export，可以使子进程使用父进程的变量。
+  env 可以显示所有的环境变量，所有bash进程都可以使用。
+  set 可以显示一些系统预定义变量，
+
+
+
+5.配置文件保存地点 //序号表明加载加载顺序，建议切换时用su - root 登陆方式。
+1./etc/profile
+4./etc/bashrc
+3.~/.bashrc
+2.~/.bash_profile
+
+/etc/proc/  //里面的每一个目录都是一个进程。
+
+
+6.shell 中的引号的不同，
+
+''   //原样输出
+""   //变量会替换为变量的值，例如  "$var1"
+`   //反引号，执行命令
+
+
+7.括号的使用
+() //1.子shell 2.元组，数组 3.(())let 的简写运算形式。4.cmd1=$(ls)将命令执行的结果赋值给一个变量。
+
+[] // test 命令  [[]]为[]的扩展写法，可以使用&& ，|| ，< , > 。
+
+{} //1. echo {0..9}  2.cp -v 4.sh{,.bak} 简化命令的书写。( -v, --verbose)
+
+   //{}的使用中间不能有空格，否则会背解释为两个部分。
+
+
+
+实用的命令
+basemane   //basename - strip directory and suffix from filenames
+ge.     原有a.mp3  b.mp3  c.mp3   批量改名为MP4
+	for name in `ls *.mp3`; do mv $name $`basename $name .mp3`.mp4; done
+
+
+
+
+
+
+
+命令行参数
+1.$0 命令名   $1 $2 ...    为命令后跟着的参数。
+2.$* , $@   为全部参数
+3.$#  为现有参数个数。这里可以配合shift命令，让第一个参数消失，其他参数左移，永远对第一参数做处理。
+
+
+
+系统自建了函数库，/etc/init.d/functions   
+
+
+fork 炸弹 // func() { func | func& }; func
+
+trap  //可以捕获kill 信号，-9 无法捕获，可以捕获-2 从而不被ctrl+c结束。
+
+
+at //添加计划任务，atq查看所有的计划任务。
+crontab - maintains crontab files for individual users
+
+crontab -e edit
+crontab -l list

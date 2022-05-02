@@ -1,0 +1,244 @@
+ls -d  //只显示当前目录的文件夹和文件，不直接显示文件夹中的内容,特别是在使用通配符时区别很大。
+ls -R  //递归
+ls -m  //mark，带，展示
+ls -t //按时间排序
+ls -h //human readiable
+ls -S//按size排序
+ls -i //查看inode
+stat //该命令为ls 的增强版
+
+cp -v //verbose  详细信息
+
+
+ps //进程   状态
+ps -p PID  //   只看某个进程的信息
+ps -e  //其他进程
+ps -ef //
+ps -eLf //线程
+pstree //树形结构,很有用的命令，可以看出现有的进程全局关系
+top //进程动态  
+
+
+kill -l //信号  9号为杀死进程
+
+nice  //设置进程优先级  nice -n 10 PID
+renice  //调整进程优先级  renice -n 0 PID
+
+
+./a.sh  &    //程序在后台运行
+ctrl + Z //挂起前台程序
+jobs  //显示后台程序
+fg + 数字  //配合jobs 调入程序到前台
+
+
+tail -f /var/log/messages   //跟踪文件变化
+nohup tail -f /var/log/messages  //即使关闭终端，该进程还存在，父进程变为1号进程
+
+
+/proc/PID  //文件夹中的内容为进程实体
+
+
+screen //相当于一个守护进程 详见 https://cloud.tencent.com/developer/article/1844735
+
+
+/var/log   目录下有许多日志文件，其中，几个比较重要的文件为：
+1.messages //系统出现的问题
+2.dmesg    //系统内核信息
+3.secure  //系统的安全日志
+4.cron    //计划任务的日志
+
+rpm -qa    //dpkg -list 两个命令都是列出所有已安装的软件包
+
+scp root@120.26.107.38:tlcl.pdf D: //前后两个参数可以互换位置，这样就可以实现本地与服务器的双向复制文件。其实是用到了SSH服务，不用提前SSH远程登陆，其中包含远程登陆功能。
+
+
+sftp root@120.26.107.38  //将SSH服务器做未ftp服务器使用，非常方便，可以在本地和远程终端之间传递文件，可以使用多种命令。
+eg.
+put 'Country Driving.pdf'  //将本地文件'Country Driving.pdf'上传到远端。
+get nohup.out  //将远端nohup.out文件下载到本地。
+cd  //切换远端目录。
+lcd  //local cd  切换本地目录。
+
+
+SSH/scp/sftp  三个命令都可以在Windows命令行运行。
+wget   //非常好的下载工具，man手册也写的不错。作者的个人网站www.linuxcommand.org
+
+
+getenforce //SELinux
+
+
+free  //静态查看内存情况，可以加参数，free -m  已兆字节来显示。同理free -g
+
+top  //动态查看内存情况。
+
+
+查看磁盘、文件系统命令
+
+fdisk -l //查看磁盘情况。
+df -h  //可以查看各磁盘（分区）的挂载点。
+du - estimate file space usage  //   -h, --human-readable;  disk_use ;常用du -h
+
+dd - convert and copy a file  //
+//dd if=/dev/zero bs=4M count=10 of=afile   生成40M的00000文件
+//dd if=/dev/zero bs=4M seek=20 count=10 of=bfile  生成120M文件，跳过80M，再写入40M的00000文件。生成的文件ls -lh  ，ds -h  结果是不一样的。
+
+
+echo XXX  >  filename  //这种形式是不会修改文件的inode的，而
+			//vim filename 是会修改inode的，其实是不同的文件。
+
+
+ln  file1   file2  //为文件建立链接文件，此操作不能跨越文件系统。硬连接
+
+ln -s file1 file2  //建立符号连接、软连接，可跨越文件系统。chmod修改符号连接文件的权限不会真的修改符号连接权限，实际修改的是对应的被连接文件权限。
+
+
+另外一种赋予权限的方式。File Access Control Lists
+getfacl a.sh  //查看a.sh文件权限情况 ，后边有加号就说明有设置facl。
+setfacl -m u:user2:r a.sh //-m 增加权限，-x 减少权限  为user2 增加r权限。
+
+查看系统各项指标性能
+ sar - Collect, report, or save system activity information.
+ iftop - display bandwidth usage on an interface by host  //网络情况
+
+
+find 命令的使用
+find /etc -regex .*wd$
+find /etc  -name passwd
+find /etc -type f -regex .*wd$
+find *.txt -exec rm -v {} \;  //找到文件直接删除。\为转义字符。
+
+
+find  命令的几种等价形式。查找到文件并删除。
+find  -name "*.txt" -exec rm -v {} +
+find  -name "*.txt" -exec rm -v {} \;
+find  -name "*.txt" | xargs  rm -f 
+
+grep 命令
+
+grep "#"  /etc/bashrc |cut -d " " -f 2  //截取所得结果的部分
+
+
+sed 的使用 //行编辑器
+     sed的地址表达法
+	1.n
+	2.$
+	3./ergex/
+	4.addr1,addr2  
+	5.first~step
+	6.addr1,+n
+	7.addr!
+  
+sed //  sed 's/old/new/' file   默认情况之匹配第一个old
+    //  sed -e 's/a/aa/' -e 's/aa/bb/' file  等价与 sed -e 's/a/aa/;s/aa/bb/' file    //  sed -i 's/a/aa/;s/aa/bb/' file   对源文件做了修改
+    //  sed -r 's/(a.*b)/\1:\1/' cfile   -r使用扩展的元字符（正则）。
+    //  head -5 /etc/passwd | sed 's/root/!!!!/2'   只替换第二个匹配的root
+    //head -5 /etc/passwd | sed 's/root/!!!!/g'    g 替换所有匹配的root
+    //  head -5 /etc/passwd | sed 's/root/!!!!/p'  p 替换成功的行输出，本例替换一行，输出六行
+   //head -5 /etc/passwd | sed -n 's/root/!!!!/p'  加-n  只打印替换成功的行，一行
+   // head -5 /etc/passwd | sed -n 's/root/!!!!/w/tmp/a.txt' w将替换成功的行，写入文件。
+   //head -6 /etc/passwd | sed '1s/bin/!!!/'  指定第一行进行替换
+  //head -6 /etc/passwd | sed '1,3s/bin/!!!/' 指定1-3行进行替换
+  //head -6 /etc/passwd | sed '/lp/s/bin/!!!/'  指定含lp模式的行进行替换
+  //sed '/ab/d' testfile    d 为删除模式。
+  // sed '/ab/i hello' testfile   在匹配行上一行插入hello行
+  
+  // sed '/ab/a hello' testfile   在匹配行下一行插入hello行
+  // sed '/ab/c hello' testfile   在匹配行改写为hello
+  //sed '/ab/r  dfile' testfile   在匹配行下一行插入（读入）文件 dfile
+
+  //sed -n '1,10p' 100000.txt   读取很多行，打印1到10行
+  //sed  '10q' 100000.txt       读取1-10行，结束。 
+
+  //sed 多行模式 N命令，读入下一行，两行一起处理。P为打印一行，D为删除一行；NPD配合使用
+   //sed 'N;s/hel.lo/!!!/' afile  
+
+  //sed 'N;s/\n//;s/hello bash/hello sed\n/;P;D'  b.txt 
+  
+  //保持空间，也是另一种多行模式。
+  //h和H将模式空间内容存放到保持空间。
+  //g和G将保持空间内容取出到模式空间
+  //x交换模式空间和保持空间内容
+
+ seq 指令。tac指令
+ seq - print a sequence of numbersd
+ tac - concatenate and print files in reverse
+
+
+
+man 1 命令 //   共有九个部分，可以用man 7 man  了解。
+
+man -a  命令，查看所有章节。// man -a passwd
+
+help // help 命令，（内部命令）
+     // 命令  --help   （外部命令）
+type 命令，可以查看命令种类。
+
+tail -f //可以跟踪文件的变化
+
+
+/usr/bin /usr/sbin  系统预装的命令。
+
+
+id 用户名  //  可以检查是否存在此用户。
+
+userdel -r //删除用户时，同时删除家目录。
+
+
+visudo //给普通用户授权的配置文件。同时，同vim一样可以在末行模式中，:!临时执行sh命令。
+
+vim //I 在行头插入，i在光标位置插入。A 在行尾插入，a在光标位置后插入，o在下一行空行，O在上一行插入空行。hjkl  h,l向左右移动，两边的hl向左右移动。yy命令复制，3yy复制3行，y$从光标位置复制到行尾。dd剪切命令，也可以使用d$. u撤销，crtl+r 撤销重做。x当前字符删除，r当前字符替换。光标快速移动，^移动到行首，$移动到行尾，g移动到文首，G移动到文尾。
+
+vim //查找替换，/s  查找s  n下一个，N上一个，:s/old/new  替换本行第一个，:%s/old/new/替换所有行第一个,:%s/old/new/g 全文替换,:3,5s/old/new 在3-5行中，替换第一个old为new。
+
+
+重要的配置文件
+1./etc/passwd   
+例如：ping:x:1006:1006::/home/ping:/bin/bash
+     用户名：是否密码：用户ID：组ID：家目录：解释器
+2./etc/shadow 
+保存加密过的用户密码，用户名：密码：......
+
+3./etc/group
+root:x:0:
+组名称：是否需要秘密验证：组ID
+
+
+目录权限的表示方法
+.x   //进入目录 
+.rx  //显示目录内的文件名
+.wx  //修改目录内的文件名
+
+
+chown 修改属主和数组
+chown  属主:数组   文件名
+
+shell 快捷键  ctal + r  向前翻找命令名，相当于history | grep 命令
+
+
+文件权限控制不足，系统发明了一种方式。
+SUID /用于二进制可执行文件，执行命令时取得文件属主权限。 例如在/usr/bin/passwd文件时，该文件的权限为
+-rwsr-xr-x 1 root root 68208 3月  14 16:26 /usr/bin/passwd
+其他用户在执行该命令时，可以拥有root权限。
+设置方式为：chmod 4755 文件名，前面的4就是这个S权限。
+
+
+SGID  //用于目录，在该目录下创建的文件和目录，权限自动改为该目录的数组。
+
+SBIT //用于目录，该目录下新建的文件和目录，仅自己可以删除（还有root）如/tmp
+drwxrwxrwt 25 root root 4096 4月  30 08:52 tmp
+最后的t,就表明为SBIT权限。
+设置方式为chmod 1XXX 文件名 。
+
+
+
+
+
+网络故障排查命令。
+1.traceroute www.baidu.com
+2.ifconfig
+3.ping
+4.mtr  // mytraceroute命令
+5.nslookup //用域名查看IP
+6.telnet //telnet www.baidu.com 80 ,检查端口是否畅通。
+7.tcpdump  //抓包工具。
+8.netstat -ntpl  //查看监听服务。

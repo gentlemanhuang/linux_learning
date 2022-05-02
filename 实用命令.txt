@@ -1,0 +1,2 @@
+ls shell*   //确认能找到所需的文件。
+ls shell* | xargs  rm //直接删除找到的文件。
